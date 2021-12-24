@@ -9,4 +9,41 @@
 // This program only needs to handle arguments that satisfy
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
-// Put your code here.
+// Preparing the varaibles
+@i
+M = 0
+@tmp
+M = 0
+
+// Do a sumation of R0 + R0  R1 times
+(LOOP)
+    // Store Sumation of R0 in R2
+    @tmp
+    D = M
+    @R2
+    M = D
+    // if i >= R2 go to END
+    @i
+    D = M
+
+    @R1
+    D = D-M
+
+    @END
+    D;JEQ
+    // else R0 + R0
+    @R0
+    D = M
+
+    @tmp
+    M = M + D
+    // i++
+    @i
+    M = M + 1
+    
+    @LOOP
+    0;JMP
+
+(END)
+@END
+0;JMP
