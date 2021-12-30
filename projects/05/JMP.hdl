@@ -1,0 +1,21 @@
+CHIP JMP {
+    // zr = zero; ng = negative; ps = positive;
+    IN zr, ng, instruction[3], c;
+    OUT out;
+
+    PARTS:
+//    if j3 = 0 is searching for JEQ
+//    if j3 = 1 is searching for JNE
+    Xor(a=instruction[0], b=zr, out=JEQorJNE); // == 0 || != 0
+
+//    if j3 = 0 looking for negative or zero
+//    if j3 = 1 looking for positive or zer
+    Xor(a=instruction[0], b=ng, out=positiveORnegative); // < 0 || > 0
+    Or(a=positiveORnegative, b=zr, out=JLEorJGE);
+
+// Looking for JLT and JGT
+// If zr == 1 then JLT AND JGT won't be 1
+    Mux(a=positiveORnegative, b=false, sel=zr, out=JLEorJGE);
+
+
+}
