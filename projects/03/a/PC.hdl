@@ -16,5 +16,17 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // Getting the Load bit
+    Or(a=reset, b=load, out=resetORload);
+    Or(a=resetORload, b=inc, out=loadBit);
+
+    // Incrementing the previous value
+    Inc16(in=previous, out=incremented);
+
+    // Selecting the result
+    Mux16(a=in, b=incremented, sel=inc, out=incrementedORin);
+    Mux16(a=incrementedORin, b=in, sel=load, out=loadORincrement);
+    Mux16(a=loadORincrement, b=false, sel=reset, out=registerValue);
+
+    Register(in=registerValue, load=loadBit, out=out, out=previous);
 }
