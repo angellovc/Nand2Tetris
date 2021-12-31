@@ -1,21 +1,37 @@
 CHIP JMP {
     // zr = zero; ng = negative; ps = positive;
     IN zr, ng, instruction[3], c;
-    OUT out;
+    OUT load, inc;
 
     PARTS:
-//    if j3 = 0 is searching for JEQ
-//    if j3 = 1 is searching for JNE
-    Xor(a=instruction[0], b=zr, out=JEQorJNE); // == 0 || != 0
 
-//    if j3 = 0 looking for negative or zero
-//    if j3 = 1 looking for positive or zer
-    Xor(a=instruction[0], b=ng, out=positiveORnegative); // < 0 || > 0
-    Or(a=positiveORnegative, b=zr, out=JLEorJGE);
+//    if zr != 1 && negative != 1 : positive
+    Or(a=zr, b=ng, out=zrORng);
+    Not(in=zrORng, out=ps);
 
-// Looking for JLT and JGT
-// If zr == 1 then JLT AND JGT won't be 1
-    Mux(a=positiveORnegative, b=false, sel=zr, out=JLEorJGE);
+    // NULL or JGT
+    Mux(a=false, b=ps, sel=instruction[0], out=NULLorJGT);
+    // JEQ or JGE
+    Or(a=zr, b=ps, out=zrORps);
+    Mux(a=zr, b=zrORps, sel=instruction[0], out=JEQorJGE);
+    // JLT JNE
+    Not(in=zr, out=notZr);
+    Mux(a=ng, b=notZr, sel=instruction[0], out=JLTorJNE);
+    // JLE or JMP
+    Mux(a=zrORng, b=true, sel=instruction[0], out=JLEorJMP);
+
+    // NULLorJGT or JEQorJGE
+    Mux(a=NULLorJGT, b=JEQorJGE, sel=instruction[1], out=up);
+
+    // JLTorJNE or JLEorJMP
+    Mux(a=JLTorJNE, b=JLEorJMP, sel=instruction[1], out=down);
+
+    Mux(a=up, b=down, sel=instruction[2], out=last);
+
+    // if its not a C instruction, then, output Zero
+    Mux(a=last, b=false, sel=c, out=out, out=load);
+    Not(in=out, out=inc);
+
 
 
 }

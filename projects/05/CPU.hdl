@@ -50,9 +50,8 @@ CHIP CPU {
 
     DRegister(in=aluOutput, load=instruction[4], out=Dregister);
     
-    // The error is in the JMP chip
-    JMP(zr=zr, ng=ng, instruction=instruction[0..2], c=instruction[15], out=load);
+    JMP(zr=zr, ng=ng, instruction=instruction[0..2], c=op, load=load, inc=inc);
     
     And(a=instruction[15], b=instruction[3], out=writeM);
-    PC(in=Aregister, load=load, inc=true, reset=reset, out[0..14]=pc);
+    PC(in=Aregister, load=load, inc=inc, reset=reset, out[0..14]=pc);
 }
