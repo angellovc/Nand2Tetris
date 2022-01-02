@@ -22,10 +22,26 @@
  * Screen and Keyboard chip specifications given in the book.
  */
 
+// Screen mapping: from 01(14) 0(13) 0000000000000 to 0101111111111111
+// Keyboard:            01     1(13) 0000000000000
+// Data:                00(14) 1     1111111111110
+
+// Selector bit: 14 Data 0 or screen/keyboard 1
+// Selector bit: 13 screen 0 keyboard 1
+
 CHIP Memory {
     IN in[16], load, address[15];
     OUT out[16];
-
     PARTS:
-    // Put your code here:
+
+    Mux(a=load, b=false, sel=address[13], out=screenPreLoad);
+    Mux(a=false, b=screenPreLoad, sel=address[14], out=screenLoad);
+    Mux(a=load, b=false, sel=address[14], out=dataLoad);
+
+    RAM16K(in=in, load=dataLoad, address=address[0..13], out=dataOut);
+    Screen(in=in, load=screenLoad, address=address[0..12], out=screenOut);
+    Keyboard(out=keyboard);
+
+    Mux16(a=screenOut, b=keyboard, sel=address[13], out=screenORkeyboard);
+    Mux16(a=dataOut, b=screenORkeyboard, sel=address[14], out=out);
 }
