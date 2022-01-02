@@ -41,6 +41,8 @@ CHIP CPU {
 
     Mux16(a=instruction, b=aluOutput, sel=instruction[15], out=Ainstruction);
     Not(in=instruction[15], out=op);
+
+    // A register only opens when a A instruction type is pass throught instruction[15] is equal to 0 
     Or(a=op, b=instruction[5], out=loadA);
     ARegister(in=Ainstruction, load=loadA, out=Aregister, out[0..14]=addressM);
 
@@ -48,7 +50,9 @@ CHIP CPU {
 
     ALU( x=Dregister, y=AorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluOutput, out=outM, zr=zr, ng=ng);
 
-    DRegister(in=aluOutput, load=instruction[4], out=Dregister);
+    // D register only opens when a C instruction type is pass throught instruction[15] is equal to 1 
+    And(a=instruction[15], b=instruction[4], out=loadD);
+    DRegister(in=aluOutput, load=loadD, out=Dregister);
     
     JMP(zr=zr, ng=ng, instruction=instruction[0..2], c=op, load=load, inc=inc);
     
